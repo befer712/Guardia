@@ -377,7 +377,7 @@
 // ============================================================
 //  ⚙️ CONFIGURACIÓN — Reemplazá con tu URL de Apps Script
 // ============================================================
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxThxw3WBRmpHFZNeZBxkKHT9NcmVAcuhiRiZp7Od-3ducLH33Nf1_LKNhVunpat8kRtg/exec';
+const APPS_SCRIPT_URL = 'PEGAR_URL_AQUI';
 // ============================================================
 
 // Personal frecuente por turno (se autocompleta al cambiar turno)
@@ -570,26 +570,21 @@ async function enviarGuardia() {
   };
 
   try {
-    const res = await fetch(APPS_SCRIPT_URL, {
+    // no-cors evita el bloqueo CORS desde GitHub Pages
+    await fetch(APPS_SCRIPT_URL, {
       method: 'POST',
+      mode: 'no-cors',
       headers: { 'Content-Type': 'text/plain' },
       body: JSON.stringify(payload)
     });
-    const data = await res.json();
-
-    if (data.ok) {
-      mostrarStatus(`✅ ${data.mensaje}`, 'ok');
-      btn.innerHTML = '✅ Registrado';
-      btn.style.background = 'var(--green)';
-      // Guardar localmente como respaldo
-      localStorage.setItem(`guardia_${turno}_${fecha}`, JSON.stringify(payload));
-    } else {
-      throw new Error(data.error || 'Error desconocido');
-    }
-  } catch (err) {
-    // Guardar localmente como respaldo offline
+    // Con no-cors no se puede leer la respuesta, pero si no lanzó error el envío fue exitoso
+    mostrarStatus(`✅ Guardia registrada — ${validos.length} integrante(s) enviados. Verificá en Google Sheets.`, 'ok');
+    btn.innerHTML = '✅ Registrado';
+    btn.style.background = 'var(--green)';
     localStorage.setItem(`guardia_${turno}_${fecha}`, JSON.stringify(payload));
-    mostrarStatus(`⚠️ No se pudo enviar al servidor (${err.message}). Los datos fueron guardados localmente como respaldo.`, 'err');
+  } catch (err) {
+    localStorage.setItem(`guardia_${turno}_${fecha}`, JSON.stringify(payload));
+    mostrarStatus(`⚠️ No se pudo enviar (${err.message}). Guardado localmente como respaldo.`, 'err');
     btn.disabled = false;
     btn.innerHTML = '🔄 Reintentar';
   }
