@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Lista de Hora — Cuartel</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0f14;
+    --surface: #141720;
+    --surface2: #1c2030;
+    --surface3: #242840;
+    --border: #2a2e42;
+    --accent: #e8390e;
+    --accent2: #ff6b35;
+    --gold: #f5a623;
+    --green: #22c55e;
+    --blue: #3b82f6;
+    --red: #ef4444;
+    --text: #e8eaf0;
+    --text2: #8891aa;
+    --text3: #555e7a;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Sans', sans-serif;
+    min-height: 100vh;
+    padding-bottom: 40px;
+  }
+
+  /* HEADER */
+  .header {
+    background: var(--surface);
+    border-bottom: 3px solid var(--accent);
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+
+  .logo {
+    width: 44px; height: 44px;
+    background: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    flex-shrink: 0;
+  }
+
+  .header-text { flex: 1; }
+  .header-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px;
+    letter-spacing: 2px;
+  }
+  .header-sub {
+    font-size: 11px;
+    color: var(--text3);
+    font-family: 'IBM Plex Mono', monospace;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  /* MAIN */
+  .main {
+    padding: 20px 16px;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  /* CARD */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+
+  .card-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 15px;
+    letter-spacing: 2px;
+    color: var(--text2);
+    margin-bottom: 16px;
+    text-transform: uppercase;
+  }
+
+  /* FORM FIELDS */
+  .field { margin-bottom: 14px; }
+  .label {
+    display: block;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--text3);
+    font-family: 'IBM Plex Mono', monospace;
+    margin-bottom: 6px;
+  }
+
+  .input, .select, .textarea {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+    color: var(--text);
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 15px;
+    outline: none;
+    transition: border-color .2s;
+    -webkit-appearance: none;
+  }
+
+  .input:focus, .select:focus, .textarea:focus {
+    border-color: var(--accent);
+  }
+
+  .select { cursor: pointer; }
+
+  .row-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  /* INTEGRANTES */
+  .integrante-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 10px;
+    position: relative;
+    transition: border-color .2s;
+  }
+
+  .integrante-card.ausente { border-left: 3px solid var(--red); }
+  .integrante-card.presente { border-left: 3px solid var(--green); }
+
+  .integrante-num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--text3);
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .btn-remove {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: rgba(239,68,68,.15);
+    border: 1px solid rgba(239,68,68,.25);
+    color: var(--red);
+    border-radius: 6px;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all .15s;
+  }
+
+  .btn-remove:active { background: rgba(239,68,68,.3); }
+
+  /* ESTADO SELECTOR */
+  .estado-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+  }
+
+  .estado-btn {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    border: 1.5px solid transparent;
+    cursor: pointer;
+    transition: all .15s;
+    font-family: 'IBM Plex Mono', monospace;
+    background: var(--surface3);
+    color: var(--text2);
+  }
+
+  .estado-btn.selected-presente { background: rgba(34,197,94,.15); color: var(--green); border-color: rgba(34,197,94,.4); }
+  .estado-btn.selected-ausente { background: rgba(239,68,68,.15); color: var(--red); border-color: rgba(239,68,68,.4); }
+  .estado-btn.selected-tardanza { background: rgba(245,166,35,.15); color: var(--gold); border-color: rgba(245,166,35,.4); }
+  .estado-btn.selected-licencia { background: rgba(59,130,246,.15); color: var(--blue); border-color: rgba(59,130,246,.4); }
+  .estado-btn.selected-vacaciones { background: rgba(168,85,247,.15); color: #a855f7; border-color: rgba(168,85,247,.4); }
+
+  /* BOTONES ACCIÓN */
+  .btn-add {
+    width: 100%;
+    padding: 14px;
+    background: var(--surface2);
+    border: 2px dashed var(--border);
+    border-radius: 10px;
+    color: var(--text2);
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all .2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 4px;
+  }
+
+  .btn-add:active { border-color: var(--accent); color: var(--accent2); }
+
+  .btn-submit {
+    width: 100%;
+    padding: 18px;
+    background: var(--accent);
+    border: none;
+    border-radius: 12px;
+    color: white;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px;
+    letter-spacing: 3px;
+    cursor: pointer;
+    transition: all .2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-submit:active { background: var(--accent2); transform: scale(.98); }
+  .btn-submit:disabled { background: var(--surface3); color: var(--text3); cursor: not-allowed; transform: none; }
+
+  /* STATUS */
+  .status-box {
+    padding: 16px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    text-align: center;
+    display: none;
+    margin-top: 12px;
+  }
+  .status-box.ok { background: rgba(34,197,94,.12); border: 1px solid rgba(34,197,94,.3); color: var(--green); }
+  .status-box.err { background: rgba(239,68,68,.12); border: 1px solid rgba(239,68,68,.3); color: var(--red); }
+  .status-box.loading { background: rgba(59,130,246,.1); border: 1px solid rgba(59,130,246,.25); color: var(--blue); }
+
+  /* RESUMEN FLOTANTE */
+  .resumen-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0; right: 0;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    padding: 10px 20px;
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    font-size: 12px;
+    font-family: 'IBM Plex Mono', monospace;
+    z-index: 40;
+  }
+
+  .resumen-item { display: flex; align-items: center; gap: 6px; }
+  .resumen-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+  /* SPINNER */
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .spinner {
+    display: inline-block;
+    width: 16px; height: 16px;
+    border: 2px solid rgba(255,255,255,.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin .7s linear infinite;
+    vertical-align: middle;
+    margin-right: 8px;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">🔥</div>
+  <div class="header-text">
+    <div class="header-title">Lista de Hora</div>
+    <div class="header-sub" id="hdr-fecha">Cargando...</div>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- INFO DEL TURNO -->
+  <div class="card">
+    <div class="card-title">📋 Datos del Turno</div>
+
+    <div class="row-2">
+      <div class="field">
+        <label class="label">Fecha</label>
+        <input type="date" class="input" id="inp-fecha">
+      </div>
+      <div class="field">
+        <label class="label">Turno</label>
+        <select class="select" id="inp-turno">
+          <option value="Turno A">Turno A</option>
+          <option value="Turno B">Turno B</option>
+          <option value="Turno C">Turno C</option>
+          <option value="Rescate 1">Rescate 1</option>
+          <option value="Rescate 2">Rescate 2</option>
+          <option value="Rescate 3">Rescate 3</option>
+          <option value="Rescate 4">Rescate 4</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="label">Sector</label>
+      <select class="select" id="inp-sector" onchange="updateSectorTurnos()">
+        <option value="incendio">🔥 Guardia Incendio</option>
+        <option value="rescate">🚑 Rescate</option>
+        <option value="logistica">📦 Logística</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label class="label">Observaciones generales (opcional)</label>
+      <textarea class="textarea" id="inp-obs-general" rows="2" placeholder="Ej: Vehículo fuera de servicio, actividades especiales..."></textarea>
+    </div>
+  </div>
+
+  <!-- LISTA DE INTEGRANTES -->
+  <div class="card">
+    <div class="card-title">👥 Integrantes de Guardia</div>
+    <div id="lista-integrantes"></div>
+    <button class="btn-add" onclick="agregarIntegrante()">
+      <span style="font-size:18px;">+</span> Agregar integrante
+    </button>
+  </div>
+
+  <!-- ENVIAR -->
+  <button class="btn-submit" id="btn-enviar" onclick="enviarGuardia()">
+    Registrar Guardia
+  </button>
+  <div class="status-box" id="status-box"></div>
+
+</div>
+
+<!-- BARRA DE RESUMEN -->
+<div class="resumen-bar">
+  <div class="resumen-item">
+    <div class="resumen-dot" style="background:var(--green)"></div>
+    <span id="cnt-presentes">0 presentes</span>
+  </div>
+  <div class="resumen-item">
+    <div class="resumen-dot" style="background:var(--red)"></div>
+    <span id="cnt-ausentes">0 ausentes</span>
+  </div>
+  <div class="resumen-item">
+    <div class="resumen-dot" style="background:var(--text3)"></div>
+    <span id="cnt-total">0 total</span>
+  </div>
+</div>
+
+<script>
+// ============================================================
+//  ⚙️ CONFIGURACIÓN — Reemplazá con tu URL de Apps Script
+// ============================================================
+const APPS_SCRIPT_URL = 'PEGAR_URL_AQUI';
+// ============================================================
+
+// Personal frecuente por turno (se autocompleta al cambiar turno)
+// Podés editar esto con el personal real del cuartel
+const PERSONAL_BASE = {
+  'Turno A': [
+    { nombre: '', rango: 'Bombero' },
+    { nombre: '', rango: 'Bombero' },
+  ],
+  'Turno B': [
+    { nombre: '', rango: 'Bombero' },
+  ],
+  'Turno C': [
+    { nombre: '', rango: 'Bombero' },
+  ],
+};
+
+const RANGOS = ['Bombero','Cabo','Sargento','Teniente','Capitán','Mayor','Operador','Aux. Logística'];
+const ESTADOS = [
+  { key: 'presente', label: '✅ Presente' },
+  { key: 'ausente', label: '❌ Ausente' },
+  { key: 'tardanza', label: '⏱ Tardanza' },
+  { key: 'licencia', label: '🏥 Licencia' },
+  { key: 'vacaciones', label: '🌴 Vacaciones' },
+];
+
+let integrantes = [];
+let idCounter = 0;
+
+// ---- Init ----
+(function init() {
+  const hoy = new Date().toISOString().slice(0,10);
+  document.getElementById('inp-fecha').value = hoy;
+  document.getElementById('hdr-fecha').textContent = formatFecha(hoy);
+
+  document.getElementById('inp-fecha').addEventListener('change', e => {
+    document.getElementById('hdr-fecha').textContent = formatFecha(e.target.value);
+  });
+
+  // Empezar con 3 filas vacías
+  agregarIntegrante();
+  agregarIntegrante();
+  agregarIntegrante();
+})();
+
+function formatFecha(str) {
+  if (!str) return '';
+  const [y,m,d] = str.split('-');
+  const dias = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+  const meses = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  const fecha = new Date(y, m-1, d);
+  return `${dias[fecha.getDay()]} ${d} ${meses[m-1]} ${y}`;
+}
+
+function updateSectorTurnos() {
+  const sector = document.getElementById('inp-sector').value;
+  const turnoSel = document.getElementById('inp-turno');
+  turnoSel.innerHTML = '';
+  const opciones = sector === 'incendio'
+    ? ['Turno A','Turno B','Turno C']
+    : sector === 'rescate'
+    ? ['Rescate 1','Rescate 2','Rescate 3','Rescate 4']
+    : ['Logística General'];
+  opciones.forEach(o => {
+    const opt = document.createElement('option');
+    opt.value = opt.textContent = o;
+    turnoSel.appendChild(opt);
+  });
+}
+
+// ---- Gestión de integrantes ----
+function agregarIntegrante(data) {
+  const id = ++idCounter;
+  integrantes.push({ id, nombre: data?.nombre || '', rango: data?.rango || 'Bombero', estado: 'presente', obs: '' });
+  renderIntegrantes();
+}
+
+function quitarIntegrante(id) {
+  integrantes = integrantes.filter(x => x.id !== id);
+  renderIntegrantes();
+}
+
+function setEstado(id, estado) {
+  const item = integrantes.find(x => x.id === id);
+  if (item) { item.estado = estado; renderIntegrantes(); }
+}
+
+function renderIntegrantes() {
+  const container = document.getElementById('lista-integrantes');
+  container.innerHTML = integrantes.map((p, idx) => `
+    <div class="integrante-card ${p.estado === 'presente' ? 'presente' : p.estado === 'ausente' ? 'ausente' : ''}">
+      <div class="integrante-num">Integrante ${idx + 1}</div>
+      <button class="btn-remove" onclick="quitarIntegrante(${p.id})">✕</button>
+
+      <div class="row-2" style="margin-bottom:10px;">
+        <div>
+          <label class="label">Nombre</label>
+          <input type="text" class="input" placeholder="Apellido, Nombre"
+            value="${escHtml(p.nombre)}"
+            oninput="updateIntegrante(${p.id},'nombre',this.value)"
+            autocomplete="off" autocapitalize="words">
+        </div>
+        <div>
+          <label class="label">Rango</label>
+          <select class="select" onchange="updateIntegrante(${p.id},'rango',this.value)">
+            ${RANGOS.map(r => `<option ${p.rango===r?'selected':''}>${r}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+
+      <label class="label">Estado</label>
+      <div class="estado-row">
+        ${ESTADOS.map(e => `
+          <button class="estado-btn ${p.estado===e.key ? 'selected-'+e.key : ''}"
+            onclick="setEstado(${p.id},'${e.key}')">${e.label}</button>
+        `).join('')}
+      </div>
+
+      ${p.estado !== 'presente' ? `
+        <div style="margin-top:10px;">
+          <label class="label">Observación</label>
+          <input type="text" class="input" placeholder="Detalle..."
+            value="${escHtml(p.obs||'')}"
+            oninput="updateIntegrante(${p.id},'obs',this.value)">
+        </div>` : ''}
+    </div>
+  `).join('');
+
+  actualizarResumen();
+}
+
+function updateIntegrante(id, campo, valor) {
+  const item = integrantes.find(x => x.id === id);
+  if (item) item[campo] = valor;
+  actualizarResumen();
+}
+
+function actualizarResumen() {
+  const presentes = integrantes.filter(x => x.estado === 'presente').length;
+  const ausentes = integrantes.filter(x => x.estado !== 'presente').length;
+  document.getElementById('cnt-presentes').textContent = `${presentes} presentes`;
+  document.getElementById('cnt-ausentes').textContent = `${ausentes} ausentes`;
+  document.getElementById('cnt-total').textContent = `${integrantes.length} total`;
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ---- Enviar ----
+async function enviarGuardia() {
+  const fecha = document.getElementById('inp-fecha').value;
+  const turno = document.getElementById('inp-turno').value;
+  const sector = document.getElementById('inp-sector').value;
+  const obsGeneral = document.getElementById('inp-obs-general').value;
+
+  if (!fecha || !turno) {
+    mostrarStatus('Completá la fecha y el turno.', 'err');
+    return;
+  }
+
+  const validos = integrantes.filter(x => x.nombre.trim());
+  if (validos.length === 0) {
+    mostrarStatus('Agregá al menos un integrante con nombre.', 'err');
+    return;
+  }
+
+  if (APPS_SCRIPT_URL === 'PEGAR_URL_AQUI') {
+    mostrarStatus('⚙️ Falta configurar la URL del servidor. Seguí las instrucciones del setup.', 'err');
+    return;
+  }
+
+  const btn = document.getElementById('btn-enviar');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Enviando...';
+  mostrarStatus('Enviando datos...', 'loading');
+
+  const payload = {
+    action: 'saveGuardia',
+    fecha,
+    turno,
+    sector,
+    obsGeneral,
+    integrantes: validos.map(p => ({
+      nombre: p.nombre.trim(),
+      rango: p.rango,
+      estado: p.estado,
+      observaciones: p.obs || ''
+    }))
+  };
+
+  try {
+    // no-cors evita el bloqueo CORS desde GitHub Pages
+    await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify(payload)
+    });
+    // Con no-cors no se puede leer la respuesta, pero si no lanzó error el envío fue exitoso
+    mostrarStatus(`✅ Guardia registrada — ${validos.length} integrante(s) enviados. Verificá en Google Sheets.`, 'ok');
+    btn.innerHTML = '✅ Registrado';
+    btn.style.background = 'var(--green)';
+    localStorage.setItem(`guardia_${turno}_${fecha}`, JSON.stringify(payload));
+  } catch (err) {
+    localStorage.setItem(`guardia_${turno}_${fecha}`, JSON.stringify(payload));
+    mostrarStatus(`⚠️ No se pudo enviar (${err.message}). Guardado localmente como respaldo.`, 'err');
+    btn.disabled = false;
+    btn.innerHTML = '🔄 Reintentar';
+  }
+}
+
+function mostrarStatus(msg, tipo) {
+  const el = document.getElementById('status-box');
+  el.textContent = msg;
+  el.className = 'status-box ' + tipo;
+  el.style.display = 'block';
+  el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+</script>
+</body>
+</html>
